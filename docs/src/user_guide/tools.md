@@ -24,6 +24,8 @@ Clicking on `New QCity Package` will open the native save dialog from the operat
 
 Clicking on `Load QCity Package` will open the native open dialog from the operating system. Browse to the location of an existing QCity GeoPackage and click `Open`.
 
+> The `Load QCity Package` functionality does not work for geopackages with no QCity layers. To import geopackages without QCity layers, you can drag the geopackage from the file manager onto the QGIS window. For further information on importing data in QGIS, see the QGIS [documentation](https://docs.qgis.org/3.44/en/docs/user_manual/managing_data_source/opening_data.html#loading-a-layer-from-a-file).
+
 ### Data Structure
 
 When a new QCity GeoPackage is created, three layers are automatically created. These layers are:
