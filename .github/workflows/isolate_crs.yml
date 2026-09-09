@@ -1,0 +1,29 @@
+name: Isolate QGIS regression
+on:
+  push:
+    branches: [validation/crs]
+    paths: [.github/workflows/isolate_crs.yml]
+permissions:
+  contents: read
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        selection:
+          - 'not TestDatabaseCrs'
+          - 'not TestDatabaseCrs or test_loading_existing_package or test_settings_button'
+          - 'not TestDatabaseCrs or test_dialog or test_cancel'
+          - 'not TestDatabaseCrs or test_all_new_layers or test_epsg_and_custom or test_default_and_corrupt or test_invalid_crs'
+    env:
+      QGIS_TEST_VERSION: '3.44'
+      SELECTION: ${{ matrix.selection }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/database-crs-settings
+      - name: Test selected new cases with renderer regression
+        run: |
+          docker compose -f .docker/docker-compose.yml run --rm -e SELECTION qgis bash -c 'cd /usr/src && xvfb-run python3 -m pytest -v qcity/test/test_database_crs.py qcity/test/test_layer_utils.py -k "$SELECTION"'
