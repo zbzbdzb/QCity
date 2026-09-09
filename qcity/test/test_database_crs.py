@@ -47,7 +47,7 @@ class TestDatabaseCrs(QCityTestBase):
         self.assertTrue(
             crs.createFromProj(
                 "+proj=tmerc +lat_0=-27.456 +lon_0=153.123 +k=0.9996 "
-                "+x_0=500000 +y_0=10000000 +ellps=GRS80 +units=m +no_defs"
+                "+x_0=500000 +y_0=10000000 +ellps=GRS80 +units=m +no_defs +type=crs"
             )
         )
         self.assertFalse(crs.authid())
