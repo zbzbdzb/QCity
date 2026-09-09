@@ -1,0 +1,31 @@
+name: Validate CRS changes
+on:
+  push:
+    branches: [validation/crs]
+    paths: [.github/workflows/validate_crs.yml]
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Commit or branch to test
+        required: true
+        default: 4c68b5c
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        qgis: ['3.44', latest]
+    env:
+      QGIS_TEST_VERSION: ${{ matrix.qgis }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.revision || '4c68b5c' }}
+      - name: Record revision
+        run: git rev-parse HEAD
+      - name: Test in QGIS
+        run: docker compose -f .docker/docker-compose.yml run --rm qgis /usr/src/.docker/run-docker-tests.sh
