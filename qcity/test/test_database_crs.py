@@ -7,6 +7,8 @@ from unittest.mock import patch
 from qgis.PyQt.QtWidgets import QDialogButtonBox
 from qgis.core import (
     QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsPointXY,
     QgsProject,
     QgsSettings,
     QgsVectorLayer,
@@ -56,12 +58,34 @@ class TestDatabaseCrs(QCityTestBase):
         self.addCleanup(self.delete_qobject, dialog)
         return dialog
 
+    def assert_crs_equivalent(self, actual, expected):
+        self.assertTrue(actual.isValid())
+        if expected.authid():
+            self.assertEqual(actual.authid(), expected.authid())
+        else:
+            # PROJ/GDAL can normalize unnamed WKT nodes during a round trip.
+            # Check parameters and coordinates, not descriptive WKT names.
+            self.assertEqual(actual.toProj(), expected.toProj())
+            self.assertEqual(actual.mapUnits(), expected.mapUnits())
+            source = QgsCoordinateReferenceSystem("EPSG:4326")
+            actual_transform = QgsCoordinateTransform(
+                source, actual, QgsProject.instance()
+            )
+            expected_transform = QgsCoordinateTransform(
+                source, expected, QgsProject.instance()
+            )
+            for point in (QgsPointXY(153, -27), QgsPointXY(154, -28)):
+                actual_point = actual_transform.transform(point)
+                expected_point = expected_transform.transform(point)
+                self.assertAlmostEqual(actual_point.x(), expected_point.x(), places=6)
+                self.assertAlmostEqual(actual_point.y(), expected_point.y(), places=6)
+
     def assert_package_crs(self, path, expected):
         for name in ("project_areas", "development_sites", "building_levels"):
             with self.subTest(layer=name):
                 layer = QgsVectorLayer(f"{path}|layername={name}", name, "ogr")
                 self.assertTrue(layer.isValid())
-                self.assertEqual(layer.crs(), expected)
+                self.assert_crs_equivalent(layer.crs(), expected)
                 del layer
 
     def test_default_and_corrupt_settings(self):
@@ -77,7 +101,9 @@ class TestDatabaseCrs(QCityTestBase):
         for crs in (QgsCoordinateReferenceSystem("EPSG:7850"), self.custom_crs()):
             with self.subTest(crs=crs.toProj()):
                 SETTINGS_MANAGER.set_default_database_crs(crs)
-                self.assertEqual(SettingsManager().default_database_crs(), crs)
+                self.assert_crs_equivalent(
+                    SettingsManager().default_database_crs(), crs
+                )
 
     def test_invalid_crs_preserves_saved_choice(self):
         expected = QgsCoordinateReferenceSystem("EPSG:7850")
@@ -151,7 +177,7 @@ class TestDatabaseCrs(QCityTestBase):
         dialog = self.dialog()
         dialog.crs_widget.setCrs(expected)
         dialog.button_box.button(QDialogButtonBox.StandardButton.Ok).click()
-        self.assertEqual(self.dialog().crs_widget.crs(), expected)
+        self.assert_crs_equivalent(self.dialog().crs_widget.crs(), expected)
 
     def test_settings_button_works_without_loaded_database(self):
         widget = QCityDockWidget(QgsProject.instance(), IFACE)
