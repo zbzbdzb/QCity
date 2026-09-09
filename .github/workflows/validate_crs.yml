@@ -8,7 +8,7 @@ on:
       revision:
         description: Commit or branch to test
         required: true
-        default: 4c68b5c
+        default: 4c68b5c90f8db8f08fbee257eb484048597cf77e
 permissions:
   contents: read
 jobs:
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.revision || '4c68b5c' }}
+          ref: ${{ inputs.revision || '4c68b5c90f8db8f08fbee257eb484048597cf77e' }}
       - name: Record revision
         run: git rev-parse HEAD
       - name: Test in QGIS
