@@ -145,8 +145,8 @@ class TestDatabaseCrs(QCityTestBase):
                 self.assert_package_crs(old_path, original)
                 self.assertEqual(project.crs().authid(), "EPSG:4326")
             finally:
-                project.clear()
                 self.delete_qobject(widget)
+                project.clear()
 
     def test_dialog_initializes_and_saves_only_on_ok(self):
         dialog = self.dialog()
