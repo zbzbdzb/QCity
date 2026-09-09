@@ -1,0 +1,20 @@
+name: Diagnose QGIS process crash
+on:
+  push:
+    branches: [validation/crs]
+    paths: [.github/workflows/diagnose_crs.yml]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      QGIS_TEST_VERSION: '3.44'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/database-crs-settings
+      - name: Diagnose native crash
+        run: |
+          docker compose -f .docker/docker-compose.yml run --rm qgis bash -c 'apt-get update -qq && apt-get install -y -qq gdb && cd /usr/src && xvfb-run gdb -batch -ex run -ex "bt 35" --args python3 -m pytest -v'
