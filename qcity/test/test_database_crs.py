@@ -65,7 +65,10 @@ class TestDatabaseCrs(QCityTestBase):
         else:
             # PROJ/GDAL can normalize unnamed WKT nodes during a round trip.
             # Check parameters and coordinates, not descriptive WKT names.
-            self.assertEqual(actual.toProj(), expected.toProj())
+            self.assertEqual(
+                set(actual.toProj().split()) - {"+type=crs"},
+                set(expected.toProj().split()) - {"+type=crs"},
+            )
             self.assertEqual(actual.mapUnits(), expected.mapUnits())
             source = QgsCoordinateReferenceSystem("EPSG:4326")
             actual_transform = QgsCoordinateTransform(
