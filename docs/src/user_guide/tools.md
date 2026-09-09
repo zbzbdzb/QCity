@@ -9,6 +9,16 @@ The QCity panel is separated into 4 vertical tabs:
 3. Building levels - digitizing building levels and setting floor level composition.
 4. Statistics - viewing statistics for each project area and exporting statistics to csv files.
 
+## Database Coordinate Reference System
+
+Click the settings button at the top left of the QCity panel to open **QCity Settings**. Under **New package CRS**, use the QGIS selector to choose a coordinate reference system appropriate for your location. The selector includes the current project CRS and recently used choices, as well as a browser for other coordinate reference systems. Click **OK** to save the choice, or **Cancel** to leave it unchanged.
+
+The choice is saved in your QGIS profile and applies to all three layers in packages created afterwards. The initial default is **EPSG:7844 (GDA2020)**. Custom coordinate reference systems are saved with their full definition. An invalid stored setting falls back to EPSG:7844.
+
+Changing this setting does not reproject existing packages or change the QGIS project CRS. For example, choosing EPSG:7850 creates new package layers in EPSG:7850, while an older EPSG:7844 package remains in EPSG:7844 when reopened. QGIS can display layers whose CRS differs from the project CRS using coordinate transformations.
+
+The package CRS controls how geometry coordinates are stored. Area calculations also depend on the QGIS project's measurement and ellipsoid settings; changing the package CRS alone is not an accuracy guarantee. Choose a CRS whose area of use covers your project and check those measurement settings when comparing areas.
+
 ## Project Areas
 
 QCity uses GeoPackages to store layer files. GeoPackage is an open, standards-based, platform independent and portable format for geospatial information. GeoPackages are a file format that act as a container for multiple spatial layers to be stored inside. For more information on GeoPackage, see the [GeoPackage Website](https://www.geopackage.org/).

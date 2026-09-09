@@ -14,6 +14,7 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QFileDialog, QListView
 from qgis.core import (
+    QgsApplication,
     QgsProject,
     Qgis,
     QgsFileUtils,
@@ -33,6 +34,7 @@ from .widget_tab_statistics import WidgetUtilsStatistics
 from ..core import DatabaseUtils, get_project_controller, LayerType
 from ..core import SETTINGS_MANAGER, block_zoom_to_feature
 from ..gui.gui_utils import GuiUtils
+from .qcity_settings_dialog import QCitySettingsDialog
 
 DOCK_WIDGET, _ = uic.loadUiType(GuiUtils.get_ui_file_path("dockwidget_main.ui"))
 
@@ -56,6 +58,11 @@ class QCityDockWidget(DOCK_WIDGET, QgsDockWidget):
         super(QCityDockWidget, self).__init__()
         self.setupUi(self)
         self.setObjectName("QCityDockWidget")
+
+        self.toolButton_settings.setIcon(
+            QgsApplication.getThemeIcon("mActionOptions.svg")
+        )
+        self.toolButton_settings.clicked.connect(self.open_settings)
 
         self.pushButton_add_base_layer.setIcon(GuiUtils.get_icon("load_layers.svg"))
         self.toolButton_project_area_add.setIcon(GuiUtils.get_icon("add.svg"))
@@ -147,6 +154,11 @@ class QCityDockWidget(DOCK_WIDGET, QgsDockWidget):
             self._on_canvas_extent_changed_timeout
         )
         self.iface.mapCanvas().extentsChanged.connect(self._on_canvas_extent_changed)
+
+    def open_settings(self) -> None:
+        """Open settings even when no database is loaded."""
+        dialog = QCitySettingsDialog(self)
+        dialog.exec()
 
     def restore_saved_database_path(self) -> None:
         path = get_project_controller().associated_database_path()

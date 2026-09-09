@@ -11,6 +11,7 @@ from qgis.PyQt.QtCore import QObject, pyqtSignal, QDir
 from qgis.PyQt.QtGui import QColor
 
 from qgis.core import (
+    QgsCoordinateReferenceSystem,
     QgsSettings,
     QgsVectorLayer,
     QgsProject,
@@ -24,6 +25,31 @@ class SettingsManager(QObject):
     """
 
     SETTINGS_KEY = "qcity"
+    DEFAULT_DATABASE_CRS = "EPSG:7844"
+
+    def default_database_crs(self) -> QgsCoordinateReferenceSystem:
+        """Returns the CRS to use when creating a new QCity database."""
+        definition = QgsSettings().value(
+            f"{self.SETTINGS_KEY}/default_database_crs",
+            self.DEFAULT_DATABASE_CRS,
+            section=QgsSettings.Section.Plugins,
+        )
+        crs = QgsCoordinateReferenceSystem(
+            definition if isinstance(definition, str) else ""
+        )
+        if not crs.isValid():
+            crs = QgsCoordinateReferenceSystem(self.DEFAULT_DATABASE_CRS)
+        return crs
+
+    def set_default_database_crs(self, crs: QgsCoordinateReferenceSystem) -> None:
+        """Saves a valid CRS, including definitions without an authority ID."""
+        if not crs.isValid():
+            raise ValueError("A valid database coordinate reference system is required")
+        QgsSettings().setValue(
+            f"{self.SETTINGS_KEY}/default_database_crs",
+            crs.toWkt(),
+            section=QgsSettings.Section.Plugins,
+        )
 
     database_path_changed = pyqtSignal(str)
     database_path_with_project_name_saved = pyqtSignal(dict)

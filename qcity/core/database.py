@@ -143,7 +143,8 @@ class DatabaseUtils:
                 )
             )
 
-        layer = QgsVectorLayer("MultiPolygon?crs=EPSG:7844", table_name, "memory")
+        layer = QgsVectorLayer("MultiPolygon", table_name, "memory")
+        layer.setCrs(SETTINGS_MANAGER.default_database_crs())
         layer.dataProvider().addAttributes(fields)
         layer.updateFields()
 
